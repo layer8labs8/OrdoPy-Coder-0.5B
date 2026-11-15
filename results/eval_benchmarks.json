@@ -1,0 +1,88 @@
+{
+  "model_name": "OrdoPy-Coder-0.5B",
+  "base_model": "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+  "scope": [
+    "English",
+    "Logical Reasoning",
+    "Python"
+  ],
+  "baseline_loss": {
+    "python_code": {
+      "loss": 1.0226,
+      "perplexity": 2.78,
+      "token_accuracy_pct": 76.44
+    },
+    "logic_math": {
+      "loss": 1.4752,
+      "perplexity": 4.37,
+      "token_accuracy_pct": 73.21
+    },
+    "english_debug": {
+      "loss": 1.6227,
+      "perplexity": 5.07,
+      "token_accuracy_pct": 59.53
+    }
+  },
+  "final_best_loss": {
+    "python_code": {
+      "loss": 0.9843,
+      "perplexity": 2.68,
+      "token_accuracy_pct": 78.4
+    },
+    "logic_math": {
+      "loss": 1.4096,
+      "perplexity": 4.09,
+      "token_accuracy_pct": 74.68
+    },
+    "english_debug": {
+      "loss": 1.4409,
+      "perplexity": 4.22,
+      "token_accuracy_pct": 61.58
+    }
+  },
+  "baseline_full_exec_421": {
+    "humaneval_passed": 16,
+    "humaneval_total": 164,
+    "humaneval_pass_at_1_pct": 9.76,
+    "mbpp_passed": 94,
+    "mbpp_total": 257,
+    "mbpp_pass_at_1_pct": 36.58,
+    "combined_pass_at_1_pct": 26.13
+  },
+  "final_full_exec_421": {
+    "humaneval_passed": 67,
+    "humaneval_total": 164,
+    "humaneval_pass_at_1_pct": 40.85,
+    "mbpp_passed": 119,
+    "mbpp_total": 257,
+    "mbpp_pass_at_1_pct": 46.3,
+    "combined_pass_at_1_pct": 44.18
+  },
+  "evalplus": {
+    "version": "0.4.0.dev44",
+    "datasets": {
+      "humaneval": {
+        "total": 164,
+        "base": {
+          "passed": 80,
+          "pass@1": 0.4878048780487805
+        },
+        "plus": {
+          "passed": 76,
+          "pass@1": 0.4634146341463415
+        }
+      },
+      "mbpp": {
+        "total": 378,
+        "base": {
+          "passed": 183,
+          "pass@1": 0.48412698412698413
+        },
+        "plus": {
+          "passed": 159,
+          "pass@1": 0.42063492063492064
+        }
+      }
+    }
+  }
+}

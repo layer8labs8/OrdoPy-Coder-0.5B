@@ -1,0 +1,19 @@
+# Python & caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Secrets & local credentials
+.env
+.env.*
+*api*.txt
+Ordo.txt
+
+# Model weights (hosted on HuggingFace Hub)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.log
