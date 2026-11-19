@@ -2,8 +2,6 @@
 
 [![HuggingFace Model](https://img.shields.io/badge/HuggingFace-layer8labs8%2FOrdoPy--Coder--0.5B-orange.svg)](https://huggingface.co/layer8labs8/OrdoPy-Coder-0.5B)
 [![Base Model](https://img.shields.io/badge/Base-Qwen%2FQwen2.5--Coder--0.5B--Instruct-blue.svg)](https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct)
-[![HumanEval Pass@1](https://img.shields.io/badge/HumanEval%20Pass%401-40.85%25-brightgreen.svg)](#official-execution-benchmarks-pass1--421-tasks)
-[![MBPP Pass@1](https://img.shields.io/badge/MBPP%20Pass%401-46.30%25-brightgreen.svg)](#official-execution-benchmarks-pass1--421-tasks)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 
 **OrdoPy-Coder-0.5B** is a compact 0.5B specialist coding and logical reasoning model tuned from `Qwen/Qwen2.5-Coder-0.5B-Instruct` for **Python programming**, **English instruction following**, and **step-by-step problem solving**.
@@ -12,28 +10,25 @@ Model weights are hosted on HuggingFace Hub: [`layer8labs8/OrdoPy-Coder-0.5B`](h
 
 ---
 
-## Official Execution Benchmarks (`Pass@1` — 421 Tasks)
+## Benchmarks (EvalPlus, greedy `pass@1`)
 
-Evaluated with greedy decoding inside isolated `3.0s`-timeout `sys.executable -I` subprocesses on the full official test suites (`openai/openai_humaneval` `164` tasks + `google-research-datasets/mbpp` `sanitized` `257` test tasks):
+Scored with the official [EvalPlus](https://github.com/evalplus/evalplus) harness (`evalplus 0.4.0`), compared with the official numbers for the base model ([Qwen2.5-Coder Technical Report](https://arxiv.org/abs/2409.12186), Table 16):
 
-| Benchmark Suite | Baseline (`Qwen2.5-Coder-0.5B-Instruct`) | `OrdoPy-Coder-0.5B` | Gain |
+| Benchmark | `Qwen2.5-Coder-0.5B-Instruct` (official) | `OrdoPy-Coder-0.5B` | Delta |
 | :--- | :---: | :---: | :---: |
-| **HumanEval (`164` tasks)** | `9.76%` (`16/164`) | **`40.85%` (`67/164`)** | **`+31.09%` (`4.19x`)** |
-| **MBPP Sanitized Test (`257` tasks)** | `36.58%` (`94/257`) | **`46.30%` (`119/257`)** | **`+9.72%` (`+25` tasks)** |
-| **Combined (`421` tasks)** | `26.13%` (`110/421`) | **`44.18%` (`186/421`)** | **`+18.05%` (`+76` tasks)** |
+| **HumanEval** | `61.6%` | `48.8%` (`80 / 164`) | `-12.8` |
+| **HumanEval+** | `57.3%` | `46.3%` (`76 / 164`) | `-11.0` |
+| **MBPP** | `52.4%` | `48.4%` (`183 / 378`) | `-4.0` |
+| **MBPP+** | `43.7%` | `42.1%` (`159 / 378`) | `-1.6` |
 
-### Official EvalPlus Suite (`evalplus` Greedy `Pass@1`)
-
-| Benchmark Suite | `OrdoPy-Coder-0.5B` `Pass@1` | Passed Tasks |
-| :--- | :---: | :---: |
-| **HumanEval (`base`)** | **`48.8%`** (`0.4878`) | `80 / 164` |
-| **HumanEval+ (`base + extra tests`)** | **`46.3%`** (`0.4634`) | `76 / 164` |
-| **MBPP (`base`)** | **`48.4%`** (`0.4841`) | `183 / 378` |
-| **MBPP+ (`base + extra tests`)** | **`42.1%`** (`0.4206`) | `159 / 378` |
+> **Correction (November 2026).** An earlier version of this card reported HumanEval rising from `9.76%` to `40.85%` (`4.19x`). That comparison was wrong: the in-house evaluation cut generations at 224 new tokens, which truncated many of the base model's longer answers, and the checkpoint was selected on a slice of the test sets. Measured with EvalPlus, **this fine-tune scores below its base model on all four benchmarks**. If you need the strongest 0.5B coder, use [`Qwen/Qwen2.5-Coder-0.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct) directly. A follow-up experiment (rejection-sampling fine-tune with LoRA on the base model's own test-verified solutions) did not degrade the model but also gave no clear gain (HumanEval `+3.1`, HumanEval+ `+1.8`, MBPP `-1.0`, MBPP+ `-3.2` vs the base measured in the same run); details in the [OrdoTrain repository](https://github.com/layer8labs8/OrdoTrain).
 
 ---
 
-## Held-Out Domain Evaluation
+## Held-Out Domain Evaluation (token-level loss)
+
+Token-level loss on held-out splits improved slightly, but this did not translate into better pass@1 (see above).
+
 
 | Domain (Held-Out Split) | Baseline Loss (PPL / Token Acc) | `OrdoPy-Coder-0.5B` Loss (PPL / Token Acc) | Gain |
 | :--- | :---: | :---: | :---: |
@@ -77,7 +72,7 @@ OrdoPy-Coder-0.5B/
 │   ├── tokenizer_config.json
 │   └── chat_template.jinja
 ├── results/
-│   └── eval_benchmarks.json         # Official 421-task Pass@1 and held-out domain evaluation metrics
+│   └── eval_benchmarks.json         # Raw training-run telemetry (its in-house pass@1 numbers are superseded by EvalPlus above)
 ├── LICENSE
 └── README.md
 ```
