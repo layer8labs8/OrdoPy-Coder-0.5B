@@ -4,7 +4,7 @@
 [![Base Model](https://img.shields.io/badge/Base-Qwen%2FQwen2.5--Coder--0.5B--Instruct-blue.svg)](https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 
-**OrdoPy-Coder-0.5B** is a compact 0.5B specialist coding and logical reasoning model tuned from `Qwen/Qwen2.5-Coder-0.5B-Instruct` for **Python programming**, **English instruction following**, and **step-by-step problem solving**.
+**OrdoPy-Coder-0.5B v2** is `Qwen/Qwen2.5-Coder-0.5B-Instruct` fine-tuned with rejection sampling: the base model's own solutions to 2,000 KodCode problems were run against unit tests, passing ones were kept, and a LoRA adapter trained on them was merged into the weights. It is about on par with the base model and clearly better than v1 (kept under the `v1` tag on Hugging Face).
 
 Model weights are hosted on HuggingFace Hub: [`layer8labs8/OrdoPy-Coder-0.5B`](https://huggingface.co/layer8labs8/OrdoPy-Coder-0.5B).
 
@@ -12,22 +12,27 @@ Model weights are hosted on HuggingFace Hub: [`layer8labs8/OrdoPy-Coder-0.5B`](h
 
 ## Benchmarks (EvalPlus, greedy `pass@1`)
 
-Scored with the official [EvalPlus](https://github.com/evalplus/evalplus) harness (`evalplus 0.4.0`), compared with the official numbers for the base model ([Qwen2.5-Coder Technical Report](https://arxiv.org/abs/2409.12186), Table 16):
+Base and v2 were scored by the official [EvalPlus](https://github.com/evalplus/evalplus) harness in the **same run** (Kaggle 2x T4, `float16`):
 
-| Benchmark | `Qwen2.5-Coder-0.5B-Instruct` (official) | `OrdoPy-Coder-0.5B` | Delta |
-| :--- | :---: | :---: | :---: |
-| **HumanEval** | `61.6%` | `48.8%` (`80 / 164`) | `-12.8` |
-| **HumanEval+** | `57.3%` | `46.3%` (`76 / 164`) | `-11.0` |
-| **MBPP** | `52.4%` | `48.4%` (`183 / 378`) | `-4.0` |
-| **MBPP+** | `43.7%` | `42.1%` (`159 / 378`) | `-1.6` |
+| Benchmark | Base, official¹ | Base, same run | **v2 (this model)** | v1 (previous upload) |
+| :--- | :---: | :---: | :---: | :---: |
+| HumanEval | `61.6` | `57.9` | **`61.0`** | `48.8` |
+| HumanEval+ | `57.3` | `53.7` | **`55.5`** | `46.3` |
+| MBPP | `52.4` | `52.1` | `51.1` | `48.4` |
+| MBPP+ | `43.7` | `44.2` | `41.0` | `42.1` |
+| **Average** | — | `52.0` | **`52.2`** | `46.4` |
 
-> **Correction (November 2026).** An earlier version of this card reported HumanEval rising from `9.76%` to `40.85%` (`4.19x`). That comparison was wrong: the in-house evaluation cut generations at 224 new tokens, which truncated many of the base model's longer answers, and the checkpoint was selected on a slice of the test sets. Measured with EvalPlus, **this fine-tune scores below its base model on all four benchmarks**. If you need the strongest 0.5B coder, use [`Qwen/Qwen2.5-Coder-0.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct) directly. A follow-up experiment (rejection-sampling fine-tune with LoRA on the base model's own test-verified solutions) did not degrade the model but also gave no clear gain (HumanEval `+3.1`, HumanEval+ `+1.8`, MBPP `-1.0`, MBPP+ `-3.2` vs the base measured in the same run); details in the [OrdoTrain repository](https://github.com/layer8labs8/OrdoTrain).
+¹ [Qwen2.5-Coder Technical Report](https://arxiv.org/abs/2409.12186), Table 16 (Qwen's own evaluation setup).
+
+**Honest summary:** v2 is clearly better than v1 (+5.8 points on average) and **about on par with the base model** (better on HumanEval / HumanEval+, worse on MBPP / MBPP+; single seed, differences of this size are close to run-to-run noise). It does not beat the base model overall.
+
+> **About v1.** The first upload is kept under the `v1` tag of this repository (`AutoModelForCausalLM.from_pretrained("layer8labs8/OrdoPy-Coder-0.5B", revision="v1")`). It was a supervised fine-tune that scores below the base model on all four benchmarks. Its card claimed HumanEval `9.76% -> 40.85%`; that comparison was a measurement error (a 224-token generation cap truncated the base model's answers, and the checkpoint was selected on test slices). `eval_benchmarks.json` in this repository is v1 training telemetry. Full v2 report and code: [OrdoTrain](https://github.com/layer8labs8/OrdoTrain) (`results/ordopy_rft_lora_report.json`).
 
 ---
 
-## Held-Out Domain Evaluation (token-level loss)
+## v1 Held-Out Domain Evaluation (token-level loss)
 
-Token-level loss on held-out splits improved slightly, but this did not translate into better pass@1 (see above).
+v1 telemetry: token-level loss on held-out splits improved slightly, but this did not translate into better pass@1.
 
 
 | Domain (Held-Out Split) | Baseline Loss (PPL / Token Acc) | `OrdoPy-Coder-0.5B` Loss (PPL / Token Acc) | Gain |
